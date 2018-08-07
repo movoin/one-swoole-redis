@@ -1,0 +1,57 @@
+{
+  "name": "one/swoole-redis",
+  "description": "Just one swoole framework.",
+  "type": "library",
+  "license": "Apache-2.0",
+  "homepage": "https://gitlab.com/onelab/one.swoole.redis",
+  "authors": [
+    {
+      "name": "Allen Luo",
+      "email": "movoin@gmail.com",
+      "homepage": "https://gitlab.com/onelab"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "One\\Redis\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "One\\Redis\\Tests\\": "tests/"
+    }
+  },
+  "require": {
+    "php": "^7.0",
+    "ext-json": "*",
+    "ext-swoole": ">=2.1.0",
+    "one/swoole": ">=0.1.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^6.5",
+    "squizlabs/php_codesniffer": "^3.3",
+    "jakub-onderka/php-parallel-lint": "^1.0",
+    "jakub-onderka/php-var-dump-check": "^0.2.0"
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "http://toran.alwooo.cn/repo/private/"
+    }
+  ],
+  "scripts": {
+    "phpunit": "phpunit -c ./phpunit.xml",
+    "phpcs": "phpcs -p --basepath=./ --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1",
+    "parallel-lint": "parallel-lint ./src",
+    "var-dump-check": "var-dump-check --no-colors --exclude vendor/ --extensions php src",
+    "fix-style": "phpcbf -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 src"
+  },
+  "config": {
+    "preferred-install": "dist",
+    "sort-packages": true,
+    "optimize-autoloader": true,
+    "secure-http": false
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
