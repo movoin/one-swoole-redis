@@ -57,23 +57,20 @@ class Client
      */
     public function __construct(array $config = [])
     {
+        $this->configure($config);
+    }
+
+    /**
+     * 配置客户端
+     *
+     * @param array $config
+     */
+    public function configure(array $config)
+    {
         $this->config = array_merge(
             $this->config,
             $config
         );
-    }
-
-    /**
-     * 映射 Redis 方法
-     *
-     * @param string $method
-     * @param array  $args
-     *
-     * @return mixed
-     */
-    public function __call($method, $args)
-    {
-        return call_user_func_array([$this->connect(), $method], $args);
     }
 
     /**
@@ -154,5 +151,18 @@ class Client
             }
             $this->redis = null;
         }
+    }
+
+    /**
+     * 映射 Redis 方法
+     *
+     * @param string $method
+     * @param array  $args
+     *
+     * @return mixed
+     */
+    public function __call($method, $args)
+    {
+        return call_user_func_array([$this->connect(), $method], $args);
     }
 }
