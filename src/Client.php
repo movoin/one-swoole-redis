@@ -122,11 +122,7 @@ class Client
         }
 
         if ($config['database'] !== null) {
-            if (is_int($config['database'])) {
-                $this->redis->select($config['database']);
-            } else {
-                throw new InvalidArgumentException('Database expects to be integer');
-            }
+            $this->redis->select((int) $config['database']);
         }
 
         if ($config['prefix'] !== null) {
