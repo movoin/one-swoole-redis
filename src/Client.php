@@ -26,25 +26,20 @@ use One\Redis\Exceptions\RedisException;
 class Client
 {
     /**
-     * 配置信息
+     * 客户端名称
+     *
+     * @var string
+     */
+    protected $name;
+    /**
+     * 客户端配置信息
      *
      * @var array
      */
-    protected $config = [
-        'host'          => '127.0.0.1',
-        'port'          => 6379,
-        'database'      => null,
-        'prefix'        => null,
-        'password'      => null,
-        'timeout'       => 3,
-        'readTimeout'   => 1,
-        'retryInterval' => 100,
-        'persistent'    => false,
-        'persistentId'  => 'redis'
-    ];
+    protected $config = [];
 
     /**
-     * Redis 客户端
+     * Redis 客户端实例
      *
      * @var \Redis
      */
@@ -55,22 +50,10 @@ class Client
      *
      * @param array $config
      */
-    public function __construct(array $config = [])
+    public function __construct(string $name, array $config)
     {
-        $this->configure($config);
-    }
-
-    /**
-     * 配置客户端
-     *
-     * @param array $config
-     */
-    public function configure(array $config)
-    {
-        $this->config = array_merge(
-            $this->config,
-            $config
-        );
+        $this->name = $name;
+        $this->config = $config;
     }
 
     /**
@@ -85,27 +68,26 @@ class Client
         }
 
         $this->redis = new Redis;
-        $config = $this->config;
 
-        if ($config['persistent'] === true) {
+        if ($this->config['persistent'] === true) {
             $connect = 'pconnect';
             $args = [
-                $config['host'],
-                $config['port'],
-                $config['timeout'],
-                $config['persistentId'],
-                $config['retryInterval'],
-                $config['readTimeout']
+                $this->config['host'],
+                $this->config['port'],
+                $this->config['timeout'],
+                $this->name,
+                $this->config['retryInterval'],
+                $this->config['readTimeout']
             ];
         } else {
             $connect = 'connect';
             $args = [
-                $config['host'],
-                $config['port'],
-                $config['timeout'],
+                $this->config['host'],
+                $this->config['port'],
+                $this->config['timeout'],
                 null,
-                $config['retryInterval'],
-                $config['readTimeout']
+                $this->config['retryInterval'],
+                $this->config['readTimeout']
             ];
         }
 
@@ -117,21 +99,11 @@ class Client
 
         unset($connect, $args);
 
-        if ($config['password'] !== null && ! $this->redis->auth($config['password'])) {
+        if ($this->config['password'] !== null && ! $this->redis->auth($this->config['password'])) {
             throw new InvalidArgumentException('The Redis password is wrong');
         }
 
-        if ($config['database'] !== null) {
-            $this->redis->select((int) $config['database']);
-        }
-
-        if ($config['prefix'] !== null) {
-            $this->redis->setOption(Redis::OPT_PREFIX, $config['prefix']);
-        }
-
         $this->redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_PHP);
-
-        unset($config);
 
         return $this->redis;
     }
@@ -147,6 +119,33 @@ class Client
             }
             $this->redis = null;
         }
+    }
+
+    /**
+     * 获得指定数据库的客户端
+     *
+     * @param string $database
+     *
+     * @return \One\Redis\Client
+     * @throws \InvalidArgumentException
+     */
+    public function __get($database): self
+    {
+        if (! isset($this->config['database'][$database])) {
+            throw new InvalidArgumentException(
+                sprintf('The database was not found: "%s"', $database)
+            );
+        }
+
+        $clone = clone $this;
+
+        if ($clone->redis === null) {
+            $clone->connect();
+        }
+
+        $clone->redis->select((int) $this->config['database'][$database]);
+
+        return $clone;
     }
 
     /**

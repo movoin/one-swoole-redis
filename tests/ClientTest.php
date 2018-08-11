@@ -58,9 +58,10 @@ class ClientTest extends \PHPUnit\Framework\TestCase
      */
     public function testConnectionException()
     {
-        $client = new Client([
-            'port' => 1024
-        ]);
+        $config = require __DIR__ . '/connect.php';
+        $config['port'] = 1024;
+
+        $client = new Client('test', $config);
 
         $client->get('bad');
     }
@@ -70,21 +71,10 @@ class ClientTest extends \PHPUnit\Framework\TestCase
      */
     public function testAuthException()
     {
-        $client = new Client([
-            'password' => 1024
-        ]);
+        $config = require __DIR__ . '/connect.php';
+        $config['password'] = 1024;
 
-        $client->get('bad');
-    }
-
-    /**
-     * @expectedException InvalidArgumentException
-     */
-    public function testSelectException()
-    {
-        $client = new Client([
-            'database' => 'bad'
-        ]);
+        $client = new Client('test', $config);
 
         $client->get('bad');
     }
@@ -97,7 +87,7 @@ class ClientTest extends \PHPUnit\Framework\TestCase
 
         $config = require __DIR__ . '/connect.php';
 
-        $this->redis = new Client($config);
+        $this->redis = new Client('test', $config);
     }
 
     protected function pconnect()
@@ -108,6 +98,6 @@ class ClientTest extends \PHPUnit\Framework\TestCase
 
         $config = require __DIR__ . '/pconnect.php';
 
-        $this->predis = new Client($config);
+        $this->predis = new Client('test', $config);
     }
 }
